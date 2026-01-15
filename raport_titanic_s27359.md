@@ -33,9 +33,44 @@ Problem jest interesujący ze względu na:
 
 ![](titanic_eda_plots.png)
 
-*Rysunek 1: Trzy panele analizy EDA: (a) Rozkład wieku pasażerów, (b) Współczynnik przeżycia według klasy, (c) Współczynnik przeżycia według płci*
+*Rysunek 1: Trzy panele analizy danych: (a) Rozkład wieku pasażerów, (b) Współczynnik przeżycia według klasy, (c) Współczynnik przeżycia według płci*
 
-- Dodatkowo, w załączonej analizie EDA przedstawiono porównanie rozkładu wieku przed i po czyszczeniu danych, co ilustruje wpływ procesu imputacji brakujących wartości.
+**Analiza brakujących wartości:** Rozkład brakujących wartości w danych surowych pokazuje, które cechy wymagają szczególnej uwagi podczas przetwarzania.
+
+![](titanic_missing_values.png)
+
+*Rysunek 2: Rozkład brakujących wartości w danych surowych - wiek (20.1%), kabina (77.5%), oraz pojedyncze braki w innych cechach*
+
+**Macierz korelacji:** Analiza korelacji między cechami numerycznymi ujawnia silne zależności między klasą, opłatą i wiekiem.
+
+![](titanic_correlation_matrix.png)
+
+*Rysunek 3: Macierz korelacji cech numerycznych - silna ujemna korelacja między klasą a opłatą (-0.55), umiarkowana korelacja między klasą a wiekiem (-0.37)*
+
+
+**Rozkład cech numerycznych:** Histogramy przedstawiają rozkład opłaty, liczby rodzeństwa/małżonków oraz liczby rodziców/dzieci przed czyszczeniem danych.
+
+![](titanic_numeric_distributions_before.png)
+
+*Rysunek 4: Rozkład cech numerycznych przed czyszczeniem - opłata (silnie prawostronnie skośna), większość pasażerów podróżuje samotnie*
+
+**Porównanie rozkładu wieku:** Wizualizacja ilustruje wpływ procesu czyszczenia danych na rozkład wieku pasażerów.
+
+![](titanic_age_comparison.png)
+
+*Rysunek 5: Porównanie rozkładu wieku przed (lewy panel) i po (prawy panel) czyszczeniu danych - imputacja brakujących wartości i przycięcie wartości odstających*
+
+**Dodatkowe analizy:** Po procesie czyszczenia danych przeprowadzono dodatkowe analizy czynników wpływających na przeżycie, w tym analizę grup wiekowych, rozmiaru rodziny, portu zaokrętowania oraz tytułów pasażerów.
+
+![](titanic_additional_eda.png)
+
+*Rysunek 6: Dodatkowe analizy po czyszczeniu danych - czteropanelowy wykres przedstawiający: (a) Współczynnik przeżycia według grup wiekowych, (b) Współczynnik przeżycia według rozmiaru rodziny, (c) Współczynnik przeżycia według portu zaokrętowania, (d) Współczynnik przeżycia według tytułu*
+
+**Analiza rozkładu wieku:** Boxplot przedstawia rozkład wieku pasażerów według klasy oraz według przeżycia, co pozwala na wizualizację mediany, kwartyli oraz wartości odstających.
+
+![](titanic_age_boxplots.png)
+
+*Rysunek 7: Boxplot wieku pasażerów - lewy panel: rozkład wieku według klasy (1, 2, 3), prawy panel: rozkład wieku według przeżycia (nie przeżył, przeżył)*
 
 **Uzasadnienie:** Dane zawierają kluczowe informacje demograficzne i podróżnicze, które mogą korelować z szansami przeżycia:
 - Klasa kabiny odzwierciedla status społeczno-ekonomiczny i lokalizację na statku
@@ -53,7 +88,7 @@ Problem jest interesujący ze względu na:
 **Uzasadnienie wyboru:** Problem jest klasyfikacją binarną (przeżył/nie przeżył). Zestaw modeli obejmuje różne podejścia do klasyfikacji, co pozwala na znalezienie najlepszego rozwiązania.
 
 **Etapy realizacji projektu:**
-1. Eksploracyjna analiza danych (EDA) - analiza rozkładów, brakujących wartości, korelacji
+1. Eksploracyjna analiza danych - analiza rozkładów, brakujących wartości, korelacji
 2. Czyszczenie danych - konwersja '?' na NaN, typy danych
 3. Inżynieria cech - ekstrakcja tytułów, tworzenie nowych zmiennych
 4. Imputacja brakujących wartości - wiek per tytuł i płeć, opłata per klasa
@@ -63,6 +98,38 @@ Problem jest interesujący ze względu na:
 8. Kodowanie kategoryczne i normalizacja (tylko na danych treningowych)
 9. Trenowanie modeli
 10. Ewaluacja i analiza wyników
+
+**Ilustracja przygotowania danych:** Poniższy wykres przedstawia porównanie rozkładu opłat przed i po przycięciu wartości odstających metodą IQR, co stanowi kluczowy etap przetwarzania danych.
+
+![](titanic_fare_distribution_comparison.png)
+
+*Rysunek 8: Porównanie rozkładu opłat przed (lewy panel) i po (prawy panel) przycięciu wartości odstających metodą IQR - redukcja skośności rozkładu poprawia stabilność modeli*
+
+**Dostrajanie hiperparametrów (Grid Search):**
+W celu optymalizacji wydajności modeli zastosowano technikę Grid Search z 3-krotną walidacją krzyżową. Dla każdego modelu zdefiniowano siatkę parametrów, a następnie wybrano najlepszą kombinację na podstawie dokładności (accuracy) na zbiorze walidacyjnym.
+
+**Wyniki Grid Search - najlepsze parametry i wyniki walidacji krzyżowej:**
+
+| Model | Najlepsze parametry | CV Accuracy (3-fold) |
+|-------|---------------------|----------------------|
+| Drzewo Decyzyjne | `max_depth`: 3, `min_samples_split`: 2 | 79.08% |
+| Regresja Logistyczna | `C`: 10, `solver`: 'lbfgs' | 79.85% |
+| K-NN | `n_neighbors`: 7, `weights`: 'uniform' | 77.65% |
+| SVM | `C`: 10, `kernel`: 'linear' | 78.80% |
+
+*Tabela 1: Wyniki dostrajania hiperparametrów metodą Grid Search z 3-krotną walidacją krzyżową*
+
+**Interpretacja wyników:** Regresja Logistyczna osiągnęła najwyższy wynik walidacji krzyżowej (79.85%), co sugeruje najlepszą generalizację na nowych danych. Wszystkie modele osiągnęły wyniki powyżej 77%, co potwierdza odpowiedni dobór siatek parametrów.
+
+Po wyborze najlepszych parametrów, modele zostały wytrenowane na pełnym zbiorze treningowym (1047 próbek) i przetestowane na zbiorze testowym (262 próbek).
+
+**Kompleksowa ewaluacja modeli:**
+Oprócz podstawowych metryk (accuracy, precision, recall, F1-score), przeprowadzono kompleksową analizę modeli obejmującą:
+- Krzywe ROC i wartość AUC-ROC dla modeli z funkcją predict_proba
+- Macierze pomyłek dla wszystkich modeli
+- Porównanie metryk na wykresie słupkowym
+
+Wizualizacje ewaluacji dostępne są w załącznikach.
 
 **Miary ewaluacji:**
 - Dokładność (Accuracy) - główna metryka, cel ≥80%
@@ -80,6 +147,28 @@ Problem jest interesujący ze względu na:
 | SVM                  | 0.8130   | 0.7576    | 0.7500 | 0.7538   | PASS |
 | Drzewo decyzyjne     | 0.7519   | 0.6667    | 0.7000 | 0.6829   | FAIL |
 
+**Analiza AUC-ROC:** Dla modeli z funkcją predict_proba obliczono obszar pod krzywą ROC (AUC-ROC). Regresja logistyczna osiągnęła AUC = 0.857, K-NN = 0.853, SVM = 0.853, co potwierdza dobrą zdolność dyskryminacyjną modeli. Krzywe ROC przedstawiono na Rysunku 9.
+
+**Wizualizacje ewaluacji modeli:** Poniżej przedstawiono kompleksową wizualizację wyników ewaluacji wszystkich modeli.
+
+**Krzywe ROC (Rysunek 9):** Wykres przedstawia krzywe ROC dla wszystkich modeli wraz z wartościami AUC-ROC. Linia przerywana reprezentuje klasyfikator losowy (AUC = 0.5). Im wyższa krzywa nad linią referencyjną, tym lepsza zdolność dyskryminacyjna modelu.
+
+![](titanic_roc_curves.png)
+
+*Rysunek 9: Krzywe ROC dla modeli - Regresja Logistyczna (AUC = 0.857), K-NN (AUC = 0.853), SVM (AUC = 0.853)*
+
+**Macierze pomyłek (Rysunek 10):** Wizualizacja macierzy pomyłek dla każdego modelu pozwala na analizę rodzajów błędów klasyfikacji (fałszywie pozytywne i fałszywie negatywne).
+
+![](titanic_confusion_matrices.png)
+
+*Rysunek 10: Macierze pomyłek dla modeli - wartości w komórkach przedstawiają liczbę sklasyfikowanych przypadków*
+
+**Porównanie metryk (Rysunek 11):** Wykres słupkowy umożliwia bezpośrednie porównanie czterech kluczowych metryk ewaluacji dla wszystkich modeli.
+
+![](titanic_metrics_comparison.png)
+
+*Rysunek 11: Porównanie metryk accuracy, precision, recall, F1-score - Regresja Logistyczna osiąga najlepsze wyniki we wszystkich metrykach*
+
 **Najważniejsze wnioski:**
 - **Regresja Logistyczna** osiągnęła najlepszy wynik: **81.68% accuracy**
 - Wszystkie modele oprócz drzewa decyzyjnego przekroczyły próg 80%
@@ -96,6 +185,7 @@ Problem jest interesujący ze względu na:
 - Przeprowadzono kompleksowe przetwarzanie danych zgodnie z wymaganiami
 - Porównano skuteczność 4 różnych algorytmów uczenia maszynowego
 - Uniknięto typowych błędów metodologicznych (wyciek danych)
+- Przeprowadzono dostrajanie hiperparametrów za pomocą Grid Search oraz kompleksową ewaluację z wykorzystaniem krzywych ROC, macierzy pomyłek i porównaniem metryk
 
 **Jakie były problemy? Jak je rozwiązaliśmy?**
 1. **Brakujące wartości wieku** (263 rekordy) - rozwiązano przez imputację średnią według tytułu, a następnie średnią według płci
@@ -112,3 +202,9 @@ Problem jest interesujący ze względu na:
 
 ## Załączniki
 ### Załącznik 1. Eksploracyjna analiza danych - eda_titanic_s27359.pdf
+
+### Załącznik 2. Wizualizacje ewaluacji modeli
+Pliki PNG zawierające wizualizacje ewaluacji modeli:
+1. `titanic_roc_curves.png` - Krzywe ROC dla wszystkich modeli (Rysunek 9)
+2. `titanic_confusion_matrices.png` - Macierze pomyłek dla każdego modelu (Rysunek 10)
+3. `titanic_metrics_comparison.png` - Porównanie metryk accuracy, precision, recall, F1-score (Rysunek 11)

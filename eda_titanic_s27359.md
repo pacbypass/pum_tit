@@ -164,27 +164,72 @@ NaN    2 (0.2%)
 
 *Rysunek 1: Trzy panele analizy EDA Titanica*
 
-### 5.1 Rozkład wieku (lewy panel)
+### 5.4 Analiza brakujących wartości
+
+![](titanic_missing_values.png)
+
+*Rysunek 2: Rozkład brakujących wartości w danych surowych*
+
+**Obserwacje:**
+- Wiek ma 20.1% brakujących wartości (263 rekordy)
+- Kabina (cabin) ma 77.5% braków, co uzasadnia utworzenie zmiennej binarnej `has_cabin`
+- Pozostałe zmienne mają niewielką liczbę braków (<1%)
+
+### 5.5 Macierz korelacji cech numerycznych
+
+![](titanic_correlation_matrix.png)
+
+*Rysunek 3: Macierz korelacji między cechami numerycznymi*
+
+**Kluczowe korelacje:**
+- Silna dodatnia korelacja między klasą (pclass) a opłatą (fare): -0.55 (wyższa klasa = wyższa opłata)
+- Ujemna korelacja między klasą a wiekiem: -0.37 (wyższa klasa = starsi pasażerowie)
+- Słaba korelacja między przeżyciem a płcią (zakodowaną numerycznie): 0.54
+- Brak silnych korelacji między pozostałymi zmiennymi
+
+### 5.6 Rozkład cech numerycznych przed czyszczeniem
+
+![](titanic_numeric_distributions_before.png)
+
+*Rysunek 4: Rozkład cech numerycznych przed czyszczeniem danych*
+
+**Obserwacje:**
+- **Opłata (fare):** Rozkład silnie prawostronnie skośny z ekstremalnymi wartościami (>500)
+- **Rodzeństwo/małżonkowie (sibsp):** 68% pasażerów podróżuje bez rodzeństwa/małżonka
+- **Rodzice/dzieci (parch):** 76% pasażerów podróżuje bez rodziców/dzieci
+
+### 5.7 Porównanie rozkładu opłat przed i po przycięciu wartości odstających
+
+![](titanic_fare_distribution_comparison.png)
+
+*Rysunek 5: Porównanie rozkładu opłat przed (lewy panel) i po (prawy panel) przycięciu wartości odstających metodą IQR*
+
+**Wpływ przycięcia:**
+- **Przed przycięciem:** Rozkład wykazuje ekstremalne wartości (>500), które zniekształcają statystyki
+- **Po przycięciu:** Wartości powyżej górnego kwartylu + 1.5×IQR zostały przycięte do wartości granicznej
+- **Efekt:** Redukcja skośności rozkładu, co poprawia stabilność modeli
+
+### 5.8 Rozkład wieku (lewy panel)
 - Rozkład prawostronnie skośny z większą liczbą młodych osób
 - Większość pasażerów w wieku 20-40 lat
 - Widoczna grupa dzieci (<10 lat)
 - Brak wyraźnych grup wiekowych powyżej 60 lat
 
-### 5.2 Przeżycie według klasy (środkowy panel)
+### 5.9 Przeżycie według klasy (środkowy panel)
 - Wyraźny gradient: klasa 1 > klasa 2 > klasa 3
 - Różnica między klasą 1 a 3 wynosi 36.4 punktów procentowych
 - Wskazuje na silny wpływ statusu społeczno-ekonomicznego na szanse przeżycia
 
-### 5.3 Przeżycie według płci (prawy panel)
+### 5.10 Przeżycie według płci (prawy panel)
 - Dramatyczna różnica: kobiety 72.7% vs mężczyźni 19.1%
 - Potwierdzenie historycznie udokumentowanej zasady priorytetowej ewakuacji kobiet i dzieci
 
-### 5.4 Porównanie rozkładu wieku przed i po czyszczeniu
+### 5.11 Porównanie rozkładu wieku przed i po czyszczeniu
 Aby zilustrować wpływ procesu czyszczenia danych, porównano rozkład wieku przed i po przetworzeniu:
 
 ![](titanic_age_comparison.png)
 
-*Rysunek 2: Porównanie rozkładu wieku przed czyszczeniem (lewy panel) i po czyszczeniu (prawy panel)*
+*Rysunek 6: Porównanie rozkładu wieku przed czyszczeniem (lewy panel) i po czyszczeniu (prawy panel)*
 
 **Kluczowe obserwacje:**
 1. **Przed czyszczeniem:** Wykazano 263 brakujących wartości wieku (20.1% danych), reprezentowanych jako '?' w surowych danych. Rozkład oparty jest na 1046 dostępnych rekordach.
@@ -194,6 +239,20 @@ Aby zilustrować wpływ procesu czyszczenia danych, porównano rozkład wieku pr
    - Mediana wieku: 28.0 → 28.0 lat (bez zmian)
    - Rozkład zachowuje prawostronną skośność, ale staje się bardziej kompletny
 4. **Wpływ imputacji:** Uzupełnienie brakujących wartości pozwoliło na zachowanie wszystkich 1309 rekordów bez utraty danych, co jest kluczowe dla jakości modelu.
+
+
+### 5.12 Boxplot wieku według klasy i przeżycia
+Boxplot przedstawia rozkład wieku pasażerów według klasy oraz według przeżycia, co pozwala na wizualizację mediany, kwartyli oraz wartości odstających. Wykres składa się z dwóch panelów: lewy panel pokazuje rozkład wieku według klasy (1, 2, 3), a prawy panel pokazuje rozkład wieku według przeżycia (nie przeżył, przeżył).
+
+![](titanic_age_boxplots.png)
+
+*Rysunek 7: Boxplot wieku pasażerów - lewy panel: rozkład wieku według klasy (1, 2, 3), prawy panel: rozkład wieku według przeżycia (nie przeżył, przeżył)*
+
+**Kluczowe obserwacje z boxplotu wieku:**
+- **Rozkład według klasy:** Pasażerowie klasy 1 mają najwyższą medianę wieku (~39 lat), podczas gdy pasażerowie klasy 3 mają najniższą medianę wieku (~24 lat). Potwierdza to obserwację, że starsi pasażerowie mają wyższy status ekonomiczny.
+- **Rozkład według przeżycia:** Mediana wieku osób, które przeżyły, jest niższa (~28 lat) niż mediana wieku osób, które nie przeżyły (~30 lat). Wskazuje to na wyższe szanse przeżycia młodszych pasażerów.
+- **Wartości odstające:** W obu panelach widoczne są wartości odstające powyżej 60-70 lat, co zostało uwzględnione w procesie czyszczenia danych.
+- **Rozrzut danych:** Rozkład wieku w klasie 3 ma największy rozrzut (najszersze pudełko), co sugeruje większą różnorodność wieku wśród pasażerów klasy trzeciej.
 
 ## 6. Analiza korelacji i zależności
 
@@ -228,5 +287,50 @@ Aby zilustrować wpływ procesu czyszczenia danych, porównano rozkład wieku pr
 5. **Przycięcie wartości odstających:** Wiek >67, opłata (metoda IQR)
 6. **Normalizacja:** Wszystkie zmienne numeryczne znormalizować metodą MinMax
 
-## 8. Podsumowanie EDA
+## 8. Dodatkowe analizy EDA po czyszczeniu danych
+Po procesie czyszczenia danych i inżynierii cech, przeprowadzono dodatkowe analizy eksploracyjne, które dostarczają głębszego wglądu w czynniki wpływające na przeżycie pasażerów Titanica.
+
+![](titanic_additional_eda.png)
+
+*Rysunek 8: Dodatkowe analizy EDA po czyszczeniu danych - czteropanelowy wykres przedstawiający: (a) Współczynnik przeżycia według grup wiekowych, (b) Współczynnik przeżycia według rozmiaru rodziny, (c) Współczynnik przeżycia według portu zaokrętowania, (d) Współczynnik przeżycia według tytułu*
+
+### 8.1 Współczynnik przeżycia według grup wiekowych
+Analiza potwierdza zasadę priorytetowej ewakuacji dzieci:
+- **Bobasy (0-6 lat):** 65.2% przeżycia - najwyższy wskaźnik wśród wszystkich grup wiekowych
+- **Dzieciaki (6-12 lat):** 46.7% przeżycia
+- **Nastolatki (12-18 lat):** 40.0% przeżycia
+- **Dorośli (18+ lat):** 36.8% przeżycia
+
+Gradient przeżycia wyraźnie wskazuje, że młodsze osoby miały wyższe szanse przeżycia, co potwierdza historycznie udokumentowaną zasadę "kobiety i dzieci pierwsze".
+
+### 8.2 Współczynnik przeżycia według rozmiaru rodziny
+Analiza rozmiaru rodziny ujawnia interesujące zależności:
+- **Osoby samotne (rozmiar 1):** 30.4% przeżycia - najniższy wskaźnik
+- **Rodziny 2-osobowe:** 55.0% przeżycia
+- **Rodziny 3-osobowe:** 60.0% przeżycia
+- **Rodziny 4-osobowe:** 72.7% przeżycia
+- **Rodziny 5+ osobowe:** 25.0% przeżycia
+
+**Wnioski:** Małe rodziny (2-4 osoby) miały najwyższe szanse przeżycia, podczas gdy osoby podróżujące samotnie oraz bardzo duże rodziny miały niższe szanse. Może to wynikać z faktu, że małe rodziny mogły skuteczniej współpracować podczas ewakuacji, podczas gdy duże rodziny miały trudności z koordynacją.
+
+### 8.3 Współczynnik przeżycia według portu zaokrętowania
+Port zaokrętowania wykazuje wyraźne różnice w szansach przeżycia:
+- **Cherbourg (C):** 55.4% przeżycia
+- **Queenstown (Q):** 38.8% przeżycia
+- **Southampton (S):** 33.7% przeżycia
+
+**Interpretacja:** Pasażerowie z Cherbourg (Francja) mieli najwyższe szanse przeżycia, co może korelować z wyższym statusem społeczno-ekonomicznym (więcej pasażerów pierwszej klasy) lub narodowością.
+
+### 8.4 Współczynnik przeżycia według tytułu
+Analiza tytułów wyekstrahowanych z imion i nazwisk ujawnia dramatyczne różnice:
+- **Miss (panna):** 69.7% przeżycia
+- **Mrs (mężatka):** 79.4% przeżycia
+- **Master (młody mężczyzna):** 57.6% przeżycia
+- **Mr (mężczyzna):** 15.7% przeżycia
+- **Military (wojskowy):** 41.7% przeżycia
+- **Noble (szlachta):** 50.0% przeżycia
+
+**Kluczowe obserwacje:** Kobiety (Miss, Mrs) miały bardzo wysokie szanse przeżycia, podczas że mężczyźni (Mr) mieli bardzo niskie. Młodzi mężczyźni (Master) mieli znacząco wyższe szanse niż dorośli mężczyźni (Mr), co ponownie potwierdza priorytet dzieci. Osoby z tytułami wojskowymi i szlacheckimi miały umiarkowane szanse przeżycia.
+
+## 9. Podsumowanie EDA
 Zbiór danych Titanica zawiera cenne informacje demograficzne i podróżnicze, które silnie korelują z szansami przeżycia. Kluczowe czynniki to płeć, klasa i wiek. Znaczna liczba brakujących wartości wymaga ostrożnego przetwarzania, a niektóre zmienne (`boat`, `body`) muszą zostać usunięte ze względu na wyciek danych. Analiza potwierdza historyczne doniesienia o priorytecie ewakuacji kobiet, dzieci i pasażerów wyższych klas.
